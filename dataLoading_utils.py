@@ -1,3 +1,5 @@
+from logging import root
+
 import pandas as pd
 import xml.etree.ElementTree as et
 import os
@@ -111,6 +113,32 @@ def buildProbeJSON(amplifier_xml_path, xc_location, yc_dist, output_filename, do
         json.dump(probe_dict, f)
     
     return save_path
+
+
+def getXMLData(amplifier_xml_path):
+    """returns data for SpikeInterface read_binary function from the amplifier XML file.
+
+    Args:
+        amplifier_xml_path (_type_): _description_
+        shank_idx (int, optional): The shank index for which to extract data. Defaults to 0.
+    """
+    chanMap = []
+
+    tree = et.parse(amplifier_xml_path)
+    root = tree.getroot() 
+
+    fields = ["nBits", "nChannels","samplingRate", "offset", "lfpSamplingRate"] # voltage range and amplification on XML file are not correct (https://intantech.com/files/Intan_RHX_user_guide.pdf)
+
+    out = []
+
+    for tag in fields:
+        elem = root.find(f".//{tag}")
+        out.append(float(elem.text.strip()) if elem is not None else None)
+
+    for chanData in root.findall(".//channelGroups/group/channel"):
+        chanMap.append(int(chanData.text))
+      
+    return chanMap, [int(out[0]), int(out[1]), float(out[2]), float(out[3]), float(out[4])]
 
 
     
