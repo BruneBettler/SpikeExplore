@@ -41,7 +41,7 @@ def updateXML_skipImped(impedance_excel_path, amplifier_xml_path, threshold=5e06
         save_path = amplifier_xml_path
     else: 
         if output_xml_path == None:
-            save_path = output_xml_path = os.path.join(parent_dir, f"updated_amplifier_{datetime.now().strftime(r"%Y%m%d")}.xml")
+            save_path = output_xml_path = os.path.join(parent_dir, f"updated_amplifier_{datetime.now().strftime(r'%Y%m%d')}.xml")
     
     
     tree.write(save_path, encoding='utf-8', xml_declaration=True)
