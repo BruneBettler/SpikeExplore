@@ -7,3 +7,4 @@ scipy==1.13.1
 spikeinterface==0.103.2
 tqdm==4.67.3
 ipykernel==9.10.1
+pyqt5==5.15.11
