@@ -141,4 +141,62 @@ def getXMLData(amplifier_xml_path):
     return chanMap, [int(out[0]), int(out[1]), float(out[2]), float(out[3]), float(out[4])]
 
 
+def buildProbeJSON_modifiedCoords(amplifier_xml_path, xcoords, ycoords, output_filename, dorsalVentralOrder=False):
+    """_summary_
+
+    Args:
+        amplifier_xml_path (_type_): _description_
+        xcoords (array of floats): x-coordinate locations in um of probe contact sites for a single shank (float) or multiple (array of floats)
+        ycoords (array of floats): y-coordinate locations in um of probe contact sites for a single shank (float) or multiple (array of floats)
+        output_filename (_type_): _description_
+        dorsalVentralOrientation (bool): indicates whether the 0th entry of the chanMap defines the most dorsal point of the probe. Default False 
+    """
+    xc = []
+    yc = []
+    chanMap = []
+    n_chan = 0
+    shankInd = []
     
+    tree = et.parse(amplifier_xml_path)
+    root = tree.getroot() 
+
+    for probeIdx, group in enumerate(root.findall(".//channelGroups/group")):
+        curr_xDepth = xcoords[probeIdx] if not np.isscalar(xcoords) else xcoords
+        curr_yDepth = ycoords[probeIdx] if not np.isscalar(ycoords) else ycoords
+        curr_chanMap = []
+        curr_yc = []
+
+        for chanIdx, chanData in enumerate(group.findall("channel")):
+            if int(chanData.get("skip")) == 0: # we keep this channel
+                curr_chanMap.append(int(chanData.text))
+                shankInd.append(int(probeIdx)) 
+                xc.append(curr_xDepth) # will not need to be flipped 
+                yc.append(curr_yDepth)
+            
+            n_chan += 1 
+        
+        if dorsalVentralOrder:
+            # change the order of the yc, and chanmap for this probe before adding to the larger array
+            # shankInd array does not need to be flipped as we are working on a single probe at a time in the loop
+            yc.extend(curr_yc[::-1])
+            chanMap.extend(curr_chanMap[::-1])
+        else: 
+            yc.extend(curr_yc)
+            chanMap.extend(curr_chanMap)
+    
+    probe_dict = {
+        "xc": xc,
+        "yc": yc,
+        "kcoords": shankInd,
+        "chanMap": chanMap,
+        "n_chan": n_chan,
+        "shankInd": shankInd,
+        "chanMap_orientation_0,1,2,3...": "dorsal_to_ventral" if dorsalVentralOrder else "ventral_to_dorsal"
+    } 
+    
+    kilosort_path = r"C:\Users\social\.kilosort\probes"
+    save_path = os.path.join(kilosort_path, output_filename)
+    with open(save_path, 'w') as f:
+        json.dump(probe_dict, f)
+    
+    return save_path
