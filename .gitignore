@@ -4,4 +4,4 @@ __pycache__/
 .DS_Store
 
 kilosort_tests/kilosort_output/
-
+kilosort_output/

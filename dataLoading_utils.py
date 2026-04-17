@@ -123,6 +123,7 @@ def getXMLData(amplifier_xml_path):
         shank_idx (int, optional): The shank index for which to extract data. Defaults to 0.
     """
     chanMap = []
+    skippedChannels = []
 
     tree = et.parse(amplifier_xml_path)
     root = tree.getroot() 
@@ -136,9 +137,12 @@ def getXMLData(amplifier_xml_path):
         out.append(float(elem.text.strip()) if elem is not None else None)
 
     for chanData in root.findall(".//channelGroups/group/channel"):
-        chanMap.append(int(chanData.text))
-      
-    return chanMap, [int(out[0]), int(out[1]), float(out[2]), float(out[3]), float(out[4])]
+        chanID = int(chanData.text)
+        chanMap.append(chanID)
+        if int(chanData.get("skip")) == 1: # add channel to skipped array
+                skippedChannels.append(chanID)
+
+    return chanMap, skippedChannels, [int(out[0]), int(out[1]), float(out[2]), float(out[3]), float(out[4])]
 
 
     
