@@ -381,6 +381,21 @@ def run_from_mat_file(
 
     return result
 
+def run_from_array(
+    electrode_starts: np.ndarray,
+    electrode_stops: np.ndarray,
+    params: BundleParameters = BundleParameters(),
+    *,
+    make_plot: bool = True,
+) -> BundleResult:
+    
+    result = build_bundle(electrode_starts, electrode_stops, params)
+
+    if make_plot:
+        plot_bundle(electrode_starts, electrode_stops, result)
+
+    return result
+
 
 if __name__ == "__main__":
     mat_path = Path("matlab.mat")
