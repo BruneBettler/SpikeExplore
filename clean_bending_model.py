@@ -81,6 +81,17 @@ class BundleResult:
         return np.array([p.middle_segment_length for p in self.paths], dtype=float)
 
 
+def create_flat_geom(contact_site_num, x_flat_contact_dist, y_flat_contact_dist):
+    total_flat_width = (contact_site_num-1) * x_flat_contact_dist
+    x_positions = np.empty(contact_site_num)
+    x_positions[0] = total_flat_width
+    x_positions[1::2] = np.arange((contact_site_num) // 2) * x_flat_contact_dist
+    x_positions[2::2] = total_flat_width - (np.arange((contact_site_num - 1) // 2) + 1) * x_flat_contact_dist
+    
+    y_positions = (np.arange(contact_site_num) * y_flat_contact_dist)[::-1]
+    return np.column_stack((x_positions, y_positions))
+
+
 def _as_point(x: Iterable[float]) -> ArrayLike:
     arr = np.asarray(x, dtype=float).reshape(2)
     return arr
