@@ -1,0 +1,18 @@
+siteMap = [24, 25, 23, 26, 22, 27, 21, 28, 20, 29, 19, 30, 18, 31, 17, 32, 16, 1, 15, 2, 14, 3, 13, 4, 12, 5, 11, 6, 10, 7, 9, 8, 40, 41, 39, 42, 38, 43, 37, 44, 36, 45, 35, 46, 34, 47, 33, 48, 64, 49, 63, 50, 62, 51, 61, 52, 60, 53, 59, 54, 58, 55, 57, 56]; % (formerly viSite2Chan) Map of channel index to site ID (The mapping siteMap(i) = j corresponds to the statement 'site i is stored as channel j in the recording')
+
+selected_Neuron=10
+wavforms=(double(squeeze(res.spikesFilt(:,1,spikeClusters==selected_Neuron)))./0.195);
+
+
+wavforms_mean=mean(wavforms,2);
+
+for num_spikes=1:length(wavforms)
+   R_temp = corrcoef(wavforms_mean,wavforms(:,num_spikes));
+    R(num_spikes)=R_temp(2);
+end
+
+histogram(R,0:0.1:1)
+
+clusterSites(selected_Neuron)
+
+siteMap(clusterSites(selected_Neuron))-1
