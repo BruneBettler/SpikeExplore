@@ -1,0 +1,13 @@
+{
+    "class": "spikeinterface.core.sortingfolder.NumpyFolderSorting",
+    "module": "spikeinterface",
+    "version": "0.104.3",
+    "kwargs": {
+        "folder_path": "."
+    },
+    "annotations": {
+        "phy_folder": "C:\\Users\\social\\Desktop\\temp_Brune\\phyExport\\phy_KS4_M"
+    },
+    "properties": {},
+    "relative_paths": true
+}

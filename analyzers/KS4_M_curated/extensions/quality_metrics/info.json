@@ -1,0 +1,5 @@
+{
+    "class": "spikeinterface.metrics.quality.quality_metrics.ComputeQualityMetrics",
+    "module": "spikeinterface",
+    "version": "0.104.3"
+}
