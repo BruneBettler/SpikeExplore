@@ -1,0 +1,6 @@
+{
+    "n_components": 5,
+    "mode": "by_channel_local",
+    "whiten": true,
+    "dtype": "float32"
+}

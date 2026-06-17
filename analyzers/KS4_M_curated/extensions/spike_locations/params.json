@@ -1,0 +1,8 @@
+{
+    "ms_before": 0.5,
+    "ms_after": 0.5,
+    "peak_sign": "neg",
+    "spike_retriever_kwargs": {},
+    "method": "center_of_mass",
+    "method_kwargs": {}
+}
