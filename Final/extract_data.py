@@ -42,32 +42,52 @@ def get_prm_info(prm_path):
 
     return siteLoc, siteMap, sampleRate
 
-def identical_spikes(spike_times_A, spike_times_B, tol=0):
-        a = np.asarray(spike_times_A)
-        b = np.asarray(spike_times_B)
+def identical_spikes(spike_times_A, spike_times_B, tol=0, channels_A=None, channels_B=None):
+    a = np.asarray(spike_times_A)
+    b = np.asarray(spike_times_B)
 
-        ia = np.argsort(a)
-        ib = np.argsort(b)
+    use_channels = channels_A is not None and channels_B is not None
 
-        a_sorted = a[ia]
-        b_sorted = b[ib]
+    ia = np.argsort(a)
+    ib = np.argsort(b)
 
-        i = j = 0
-        matches = []
+    a_sorted = a[ia]
+    b_sorted = b[ib]
 
-        while i < a_sorted.size and j < b_sorted.size:
-            d = a_sorted[i] - b_sorted[j]
+    if use_channels:
+        ca = np.asarray(channels_A)[ia]
+        cb = np.asarray(channels_B)[ib]
 
-            if abs(d) <= tol:
-                matches.append((ia[i], ib[j]))  # original indices
-                i += 1
-                j += 1
-            elif d < -tol:
-                i += 1
-            else:
-                j += 1
+    matches = []
+    used_b = set()   # prevent one b spike matching multiple a spikes
+    j_start = 0      # sliding window start — never need to go back before this
 
-        return np.array(matches, dtype=int)
+    for i in range(len(a_sorted)):
+        t_a = a_sorted[i]
+
+        # advance j_start past spikes that are now too far behind
+        while j_start < len(b_sorted) and b_sorted[j_start] < t_a - tol:
+            j_start += 1
+
+        # collect all b candidates within [t_a - tol, t_a + tol]
+        best_j    = None
+        best_dist = np.inf
+
+        j = j_start
+        while j < len(b_sorted) and b_sorted[j] <= t_a + tol:
+            if j not in used_b:
+                if not use_channels or ca[i] == cb[j]:
+                    dist = abs(t_a - b_sorted[j])
+                    if dist < best_dist:
+                        best_dist = dist
+                        best_j = j
+            j += 1
+
+        if best_j is not None:
+            matches.append((ia[i], ib[best_j]))   # back to original indices
+            used_b.add(best_j)
+
+    return np.array(matches, dtype=int) if matches else np.empty((0, 2), dtype=int)
     
     
 def extract_cluster_data_JRCLUST(res_mat_path, siteMap):
@@ -103,7 +123,7 @@ def extract_unit_data_JRCLUST(res_mat_path, spikesFilt_mat_path, siteMap, cluste
     with h5py.File(res_file, "r") as f:
         spike_clusters = f["spikeClusters"][...].squeeze().ravel().astype("int32") # in MATLAB INDEXING 
         cluster_sites = f["clusterSites"][...].squeeze().ravel().astype("int32") - 1 # now in python index in sitemap where the channel is located
-        spike_times = f["spikeTimes"][...].squeeze() - 1 # TODO VERIFY THIS 
+        spike_times = f["spikeTimes"][...].squeeze() - 1 # these are spike samples so yes they need to be -1 to get to python time which starts at 0 and not 1 
     
         cluster_ids = np.unique(spike_clusters)
         cluster_ids = cluster_ids[cluster_ids > 0] # keep only valid JRCLUST ids 

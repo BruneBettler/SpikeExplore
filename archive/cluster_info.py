@@ -23,11 +23,6 @@ def isi_violations(spike_times, threshold_s=0.0015):
     isi = np.diff(np.sort(spike_times))
     return np.sum(isi < threshold_s)
 
-
-def snr(mean_waveform, noise_std):
-    return np.ptp(mean_waveform) / (2 * noise_std)
-
-
 def isolation_distance(unit_pcs, other_pcs):
     n = len(unit_pcs)
     if len(other_pcs) < n:
@@ -77,7 +72,6 @@ def compute_unit_metrics(
     pc_features=None,
     amplitudes=None,
     mean_waveforms=None,
-    noise_std=None,
 ):
     rows = []
 
@@ -95,8 +89,6 @@ def compute_unit_metrics(
 
         row["log10_firing_rate"] = np.log10(row["firing_rate_hz"] + 1e-12)
 
-        if mean_waveforms is not None and noise_std is not None:
-            row["snr"] = snr(mean_waveforms[unit_id], noise_std)
 
         if pc_features is not None:
             unit_pcs = pc_features[unit_id]
@@ -106,6 +98,7 @@ def compute_unit_metrics(
             ])
 
             row["isolation_distance"] = isolation_distance(unit_pcs, other_pcs)
+            row['L-ratio'] = None
             row["d_prime"] = d_prime(unit_pcs, other_pcs)
             row["nn_hit_rate"] = nn_hit_rate(unit_pcs, other_pcs)
 
